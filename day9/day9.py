@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, Tuple
+from typing import Set
 
 def read_input(file):
     with open(file) as file:
@@ -21,30 +21,11 @@ class Position:
     def __abs__(self) -> Position:
         return Position(abs(self.x), abs(self.y))
 
-class BasicRope:
-    def __init__(self) -> None:
-        self.tail_visited: Dict[Position, bool] = dict()
-        self.head: Position = Position(0, 0)
-        self.tail: Position = Position(0, 0)
-        self._tail_visit(self.tail)
+@dataclass()
+class RopeSegment:
+    pos: Position = Position(0,0)
 
-    def _tail_visit(self, pos: Position):
-        self.tail_visited[pos] = True
-
-    def move_head(self, d: Position, count: int):
-        for _ in range(count):
-            new_head = self.head + d
-            diff = abs(new_head - self.tail)
-            if diff.x >= 2 or diff.y >= 2:
-                # rope follows last position of head
-                self.tail = self.head
-            else:
-                # rope stays
-                pass
-
-            self.head = new_head
-            self._tail_visit(self.tail)
-
+# Position is also used to show a diff of direction
 input_mapping = {
     "U": Position(0, 1),
     "D": Position(0, -1),
@@ -52,13 +33,108 @@ input_mapping = {
     "R": Position(1, 0)
 }
 
-def main():
-    rope = BasicRope()
-    for instruction in read_input("sample_input.txt"):
-        direction, count = instruction.split(" ")
-        rope.move_head(input_mapping[direction], int(count))
+# not super proud of this
+# depending on the diff, make the correct move to follow
+diff_moves = {
+    # basic
+    Position(0, -2): Position(0, 1), # up
+    Position(0, 2): Position(0, -1), # down
+    Position(2, 0): Position(-1, 0), # left
+    Position(-2, 0): Position(1, 0), # right
 
-    print(len(rope.tail_visited.values()))
+    # diag
+    Position(-1, -2): Position(1, 1), # up-right
+    Position(-2, -1): Position(1, 1),
+
+    Position(1, -2): Position(-1, 1), # up-left
+    Position(2, -1): Position(-1, 1),
+
+    Position(-1, 2): Position(1, -1), # down-right
+    Position(-2, 1): Position(1, -1),
+
+    Position(2, 1): Position(-1, -1), # down-left
+    Position(1, 2): Position(-1, -1),
+
+    Position(-2, -2): Position(1, 1),
+    Position(-2, 2): Position(1, -1),
+    Position(2, -2): Position(-1, 1),
+    Position(2, 2): Position(-1, -1),
+}
+
+class Rope:
+    def __init__(self, length: int) -> None:
+        self.rope_segments = []
+        self.tail_visited: Set[Position] = set()
+        self.tail_visited.add(Position(0,0))
+
+        for _ in range(length):
+            self.rope_segments.append(RopeSegment())
+
+    def move_head(self, direction: Position):
+        self.rope_segments[0].pos += direction
+        # all elements after head
+        for index in range(1, len(self.rope_segments)):
+            diff = self.rope_segments[index].pos - self.rope_segments[index - 1].pos
+
+            if diff in diff_moves:
+                self.rope_segments[index].pos += diff_moves[diff]
+            else:
+                if abs(diff).x >= 2 or abs(diff).y >= 2:
+                    raise Exception(f"Rope broke: {diff}")
+
+                # no need to move, so the rest of the rope shouldn't 
+                break
+
+
+        self.tail_visited.add(self.rope_segments[-1].pos)
+
+    def print_rope(self, grid_size: int):
+        lines = []
+        for y in range(grid_size, -(grid_size + 1), -1):
+            line = ""
+            for x in range(-grid_size - 20, grid_size + 21, 1):
+                rope = None
+                for index, seg in enumerate(self.rope_segments):
+                    if seg.pos.x == x and seg.pos.y == y:
+                        rope = index
+                        break
+
+                if rope is not None:
+                    if rope == 0:
+                        line += "H"
+                    elif rope == len(self.rope_segments) - 1:
+                        line += "T"
+                    else:
+                        line += str(rope)
+                else:
+                    if x == 0 and y == 0:
+                        line += "s"
+                    else:
+                        pos = Position(x, y)
+                        if pos in self.tail_visited:
+                            line += "#"
+                        else:
+                            line += "."
+
+            lines.append(line)
+        print("\n".join(lines))
+
+def main():
+    rope = Rope(2)
+    for instruction in read_input("input.txt"):
+        direction, count = instruction.split(" ")
+        for _ in range(int(count)):
+            rope.move_head(input_mapping[direction])
+
+    print("part1", len(rope.tail_visited))
+
+    rope = Rope(10)
+    for instruction in read_input("input.txt"):
+        direction, count = instruction.split(" ")
+        for _ in range(int(count)):
+            rope.move_head(input_mapping[direction])
+
+    print("part2", len(rope.tail_visited))
 
 if __name__ == "__main__":
     main()
