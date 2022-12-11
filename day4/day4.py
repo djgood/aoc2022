@@ -1,8 +1,10 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
+from io import TextIOWrapper
 from typing import Iterator
 
+from result import Result
 
 class Range:
     """ Represents a range of numbers (closed-set)"""
@@ -32,26 +34,22 @@ class RangePair:
     range1: Range
     range2: Range
 
-def read_input(filename) -> Iterator[RangePair]:
-    with open(filename) as file:
-        for line in file:
-            ranges = line.strip().split(",")
-            range1 = Range.from_string(ranges[0])
-            range2 = Range.from_string(ranges[1])
-            yield RangePair(range1, range2)
+def parse_input(file: TextIOWrapper) -> Iterator[RangePair]:
+    for line in file:
+        ranges = line.strip().split(",")
+        range1 = Range.from_string(ranges[0])
+        range2 = Range.from_string(ranges[1])
+        yield RangePair(range1, range2)
 
-def main():
+def main(input_file: TextIOWrapper) -> Result:
     contains = 0
     overlaps = 0
-    for rp in read_input("input.txt"):
+    for rp in parse_input(input_file):
         if rp.range1.contains(rp.range2) or rp.range2.contains(rp.range1):
             contains += 1
 
         if rp.range1.overlaps(rp.range2):
             overlaps += 1
 
-    print(contains)
-    print(overlaps)
+    return Result(contains, overlaps)
 
-if __name__ == "__main__":
-    main()

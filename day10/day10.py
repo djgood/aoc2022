@@ -1,9 +1,13 @@
-def input(filename: str):
-    with open(filename) as file:
-        for line in file:
-            yield line.strip()
+from io import TextIOWrapper
+from typing import Iterator
 
-def main():
+from result import Result
+
+def input(file: TextIOWrapper) -> Iterator[str]:
+    for line in file:
+        yield line.strip()
+
+def main(input_file: TextIOWrapper) -> Result:
     cycle = 0
     X = 1
 
@@ -11,7 +15,7 @@ def main():
     beam_row = 0
 
     pipeline = []
-    for line in input("input.txt"):
+    for line in input(input_file):
         pipeline.append(line)
 
     crt_lines = []
@@ -52,9 +56,7 @@ def main():
             beam_col = 0
             beam_row += 1
 
-    print("part1", sum(interesting_cycle))
-    print("part2:")
-    print("\n".join(crt_lines))
+    part1 = sum(interesting_cycle)
+    part2 = "\n" + "\n".join(crt_lines)
+    return Result(part1, part2)
 
-if __name__ == "__main__":
-    main()

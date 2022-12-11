@@ -1,7 +1,9 @@
-from copy import copy, deepcopy
+from copy import deepcopy
+from io import TextIOWrapper
 import re
 from typing import Tuple
 
+from result import Result
 
 class Stack:
 
@@ -48,39 +50,37 @@ class Supplies:
         num = int(raw_num)
         from_stack = int(raw_from_stack) - 1
         to_stack = int(raw_to_stack) - 1
-        
+
         crates = []
         for _ in range(num):
             crates.insert(0, self.stacks[from_stack].pop_crate())
-        
+
         for crate in crates:
             self.stacks[to_stack].add_crate(crate)
 
 
-def get_input(filename: str) -> Tuple[list[str], list[str]]:
-    with open(filename) as file:
-        drawing: list[str] = []
-        steps: list[str] = []
-        drawing_over = False
-        for line in file:
-            if line == "\n":
-                drawing_over = True
-                continue
+def parse_input(file: TextIOWrapper) -> Tuple[list[str], list[str]]:
+    drawing: list[str] = []
+    steps: list[str] = []
+    drawing_over = False
+    for line in file:
+        if line == "\n":
+            drawing_over = True
+            continue
 
-            if not drawing_over:
-                drawing.append(line)
-            else:
-                steps.append(line)
+        if not drawing_over:
+            drawing.append(line)
+        else:
+            steps.append(line)
 
-        return drawing, steps
+    return drawing, steps
 
 
-def main():
-    drawing, steps = get_input("input.txt")
+def main(input_file: TextIOWrapper) -> Result:
+    drawing, steps = parse_input(input_file)
     drawing.reverse()
     num_stacks = len(drawing.pop(0).strip().split("   "))
 
-    print(f"Found {num_stacks} stacks.")
     s = Supplies(num_stacks)
 
     for line in drawing:
@@ -103,14 +103,12 @@ def main():
     for stack in s.stacks:
         output += stack.pop_crate()
 
-    print(output) 
+    output1 = output
 
     output = ""
     for stack in s2.stacks:
         output += stack.pop_crate()
 
-    print(output) 
-
-if __name__ == "__main__":
-    main()
+    output2 = output
+    return Result(output1, output2)
 

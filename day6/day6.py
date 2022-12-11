@@ -1,7 +1,6 @@
-def read_input(filename: str):
-    with open(filename) as file:
-        for line in file:
-            yield line
+from io import TextIOWrapper
+
+from result import Result
 
 def start_packet(line: str) -> int:
     for cursor in range(len(line)):
@@ -17,23 +16,9 @@ def start_message(line: str) -> int:
 
     return -1
 
-def main():
-    print("== Part 1 ==")
-    print("== Sample ==")
-    for line in read_input("sample_input.txt"):
-        print(start_packet(line))
+def main(input_file: TextIOWrapper) -> Result:
+    line = input_file.readline().strip()
+    part1 = start_packet(line)
+    part2 = start_message(line)
 
-    print("== Real ==")
-    for line in read_input("input.txt"):
-        print(start_packet(line))
-
-    print("== Part 2 ==")
-    print("== Sample ==")
-    for line in read_input("sample_input.txt"):
-        print(start_message(line))
-    print("== Real ==")
-    for line in read_input("input.txt"):
-        print(start_message(line))
-
-if __name__ == "__main__":
-    main()
+    return Result(part1, part2)

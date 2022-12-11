@@ -1,5 +1,8 @@
 from enum import Enum
+from io import TextIOWrapper
 from typing import Iterator
+
+from result import Result
 
 class OppMove(Enum):
     rock = "A"
@@ -46,15 +49,14 @@ part2_mapping = {
     MyMove.scissors: Outcome.win
 }
 
-def read_file(filename) -> Iterator[str]:
-    with open(filename) as input:
-        for line in input:
-            yield line.strip()
+def parse_input(file: TextIOWrapper) -> Iterator[str]:
+    for line in file:
+        yield line.strip()
 
-def run() -> None:
+def main(input_file: TextIOWrapper) -> Result:
     part1_total_score = 0
     part2_total_score = 0
-    for line in read_file("input.txt"):
+    for line in parse_input(input_file):
         moves = line.split(" ")
         opp_move = OppMove(moves[0])
         my_move = MyMove(moves[1])
@@ -70,8 +72,5 @@ def run() -> None:
                 part2_total_score += outcome_needed.value + move_value[move]
                 break
 
-    print(part1_total_score)
-    print(part2_total_score)
+    return Result(part1_total_score, part2_total_score)
 
-if __name__ == "__main__":
-    run()

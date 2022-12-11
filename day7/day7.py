@@ -1,13 +1,14 @@
 from __future__ import annotations
 from typing import List, Optional, Union
+from io import TextIOWrapper
 
-def read_input(path: str):
-    with open(path) as file:
-        for line in file:
-            yield line.strip()
+from result import Result
+
+def parse_input(file: TextIOWrapper):
+    for line in file:
+        yield line.strip()
 
 class File:
-
     def __init__(self, name: str, size: str) -> None:
         self.name = name
         self.size = int(size)
@@ -16,7 +17,6 @@ class File:
         return " " * current_indent + f" - {self.size} {self.name}\n"
 
 class Directory:
-
     def __init__(self, name: str, parent: Optional[Directory]) -> None:
         self.name = name
         self.parent = parent
@@ -55,8 +55,8 @@ class Directory:
 
         return sl
 
-def main():
-    terminal = read_input("input.txt")
+def main(input_file: TextIOWrapper) -> Result:
+    terminal = parse_input(input_file)
     next(terminal)
     # Parse input
     root = Directory("/", parent=None)
@@ -85,14 +85,11 @@ def main():
                 cur_dir.discover_file(file)
 
     root.calc_size()
-    print("== Part 1 ==")
-    print(sum(root.all_sizes(100000)))
+    part1 = sum(root.all_sizes(100000))
     unused = 70000000 - root.size
     space_needed = 30000000 - unused
-    print("== Part 2 ==")
     # Could probably have written the earlier function as something similar to
     # this but oh well!
-    print(min(s for s in root.all_sizes() if s > space_needed))
+    part2 = min(s for s in root.all_sizes() if s > space_needed)
+    return Result(part1, part2)
 
-if __name__ == "__main__":
-    main()

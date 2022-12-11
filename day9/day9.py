@@ -1,11 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Set
+from io import TextIOWrapper
+import itertools
+from typing import Iterator, Set
 
-def read_input(file):
-    with open(file) as file:
-        for line in file:
-            yield line.strip()
+from result import Result
+
+def parse_input(file: TextIOWrapper) -> Iterator[str]:
+    for line in file:
+        yield line.strip()
 
 @dataclass(eq=True, frozen=True)
 class Position:
@@ -119,22 +122,22 @@ class Rope:
             lines.append(line)
         print("\n".join(lines))
 
-def main():
+def main(input_file: TextIOWrapper) -> Result:
     rope = Rope(2)
-    for instruction in read_input("input.txt"):
+    p1_input, p2_input = itertools.tee(parse_input(input_file))
+    for instruction in p1_input:
         direction, count = instruction.split(" ")
         for _ in range(int(count)):
             rope.move_head(input_mapping[direction])
 
-    print("part1", len(rope.tail_visited))
+    part1 = len(rope.tail_visited)
 
     rope = Rope(10)
-    for instruction in read_input("input.txt"):
+    for instruction in p2_input:
         direction, count = instruction.split(" ")
         for _ in range(int(count)):
             rope.move_head(input_mapping[direction])
 
-    print("part2", len(rope.tail_visited))
+    part2 = len(rope.tail_visited)
+    return Result(part1, part2)
 
-if __name__ == "__main__":
-    main()

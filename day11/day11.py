@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 from functools import reduce
+from io import TextIOWrapper
 import itertools
 import operator
 from typing import Iterator, List
 
-def read_input(filename):
-    with open(filename) as file:
-        for line in file:
-            yield line.strip()
+from result import Result
+
+def parse_input(file: TextIOWrapper) -> Iterator[str]:
+    for line in file:
+        yield line.strip()
 
 def grouper(n, iterable):
     it = iter(iterable)
@@ -40,9 +42,9 @@ def read_monkeys(input: Iterator[str]) -> Iterator[Monkey]:
         test = Test(divisible, if_true, if_false)
         yield Monkey(items, operation, test)
 
-def monkey_sim(rounds: int, alternate_worry: bool = False):
-    monkeys = list(read_monkeys(read_input(("sample_input.txt"))))
+def monkey_sim(monkeys_in: Iterator[str], rounds: int, alternate_worry: bool = False):
 
+    monkeys = list(read_monkeys(monkeys_in))
     mcd = reduce(operator.mul, [monkey.test.divisible for monkey in monkeys], 1)
     for _ in range(rounds):
         for monkey in monkeys:
@@ -76,9 +78,9 @@ def monkey_sim(rounds: int, alternate_worry: bool = False):
     most_inspected = sorted([monkey.items_inspected for monkey in monkeys])[-2:]
     return most_inspected[0] * most_inspected[1]
 
-def main():
-    print("part1:", monkey_sim(rounds=20))
-    print("part2:", monkey_sim(rounds=10000, alternate_worry=True))
+def main(input_file: TextIOWrapper) -> Result:
+    input1, input2 = itertools.tee(parse_input(input_file))
+    part1 = monkey_sim(input1, rounds=20)
+    part2 = monkey_sim(input2, rounds=10000, alternate_worry=True)
+    return Result(part1, part2)
 
-if __name__ == "__main__":
-    main()

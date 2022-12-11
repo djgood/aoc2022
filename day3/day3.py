@@ -1,10 +1,12 @@
+from io import TextIOWrapper
 import itertools
 from typing import Iterator, List
 
-def read_file(filename: str) -> Iterator[str]:
-    with open(filename) as file:
-        for line in file:
-            yield line.strip()
+from result import Result
+
+def parse_input(file: TextIOWrapper) -> Iterator[str]:
+    for line in file:
+        yield line.strip()
 
 def chunked_iterable(iterable, size):
     it = iter(iterable)
@@ -30,20 +32,21 @@ class Priorities:
     part1: List[int] = []
     part2: List[int] = []
 
-priorities = Priorities()
+def main(input_file: TextIOWrapper) -> Result:
+    priorities = Priorities()
+    input1, input2 = itertools.tee(parse_input(input_file))
 
-for rucksack in read_file("input.txt"):
-    compartment_len = int(len(rucksack)/2)
-    rucksack = (rucksack[0:compartment_len], rucksack[compartment_len:])
-    rucksack = (set(rucksack[0]), set(rucksack[1]))
-    same = rucksack[0].intersection(rucksack[1])
-    priorities.part1.append(priority(same.pop()))
+    for rucksack in input1:
+        compartment_len = int(len(rucksack)/2)
+        rucksack = (rucksack[0:compartment_len], rucksack[compartment_len:])
+        rucksack = (set(rucksack[0]), set(rucksack[1]))
+        same = rucksack[0].intersection(rucksack[1])
+        priorities.part1.append(priority(same.pop()))
 
-for rucksacks in chunked_iterable(read_file("input.txt"), 3):
-    rucksacks_sets = [set(rucksack) for rucksack in rucksacks]
-    same = rucksacks_sets[0].intersection(rucksacks_sets[1]).intersection(rucksacks_sets[2])
-    priorities.part2.append(priority(same.pop()))
+    for rucksacks in chunked_iterable(input2, 3):
+        rucksacks_sets = [set(rucksack) for rucksack in rucksacks]
+        same = rucksacks_sets[0].intersection(rucksacks_sets[1]).intersection(rucksacks_sets[2])
+        priorities.part2.append(priority(same.pop()))
 
-print(sum(priorities.part1))
-print(sum(priorities.part2))
+    return Result(sum(priorities.part1), sum(priorities.part2))
 

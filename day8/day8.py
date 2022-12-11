@@ -1,17 +1,13 @@
+from io import TextIOWrapper
 from typing import List
 from functools import reduce
 import operator
 
-def read_input(filename):
-    with open(filename) as file:
-        for line in file:
-            yield line.strip()
+from result import Result
 
-filename = "input.txt"
-trees = []
-# load file as 2d array
-for line in read_input(filename):
-    trees.append([int(x) for x in list(line)])
+def parse_input(file: TextIOWrapper):
+    for line in file:
+        yield line.strip()
 
 def tallest_tree(line: list[int]) -> bool:
     """check if first element is tallest"""
@@ -67,23 +63,28 @@ def senic_score(trees: List[List[int]], x: int, y: int) -> int:
 
     return reduce(operator.mul, senic_scores, 1)
 
-assert len(trees) == len(trees[0])
-visible = 0
-max_coord = len(trees)
-max_ss = 0
-for y in range(max_coord):
-    for x in range(max_coord):
+def main(input_file: TextIOWrapper) -> Result:
+    trees = []
+    # load file as 2d array
+    for line in parse_input(input_file):
+        trees.append([int(x) for x in list(line)])
 
-        if x in [0, max_coord - 1] or y in [0, max_coord - 1]:
-            # edge is visible
-            visible += 1
-        else:
-            # interior
-            if is_visible(trees, x, y):
+    assert len(trees) == len(trees[0])
+    visible = 0
+    max_coord = len(trees)
+    max_ss = 0
+    for y in range(max_coord):
+        for x in range(max_coord):
+
+            if x in [0, max_coord - 1] or y in [0, max_coord - 1]:
+                # edge is visible
                 visible += 1
+            else:
+                # interior
+                if is_visible(trees, x, y):
+                    visible += 1
 
-            ss = senic_score(trees, x, y)
-            max_ss = max(max_ss, ss)
+                ss = senic_score(trees, x, y)
+                max_ss = max(max_ss, ss)
 
-print("visible from sides: ", visible)
-print("max_ss", max_ss)
+    return Result(visible, max_ss)

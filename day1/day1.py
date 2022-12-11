@@ -1,19 +1,18 @@
 import heapq
+from io import TextIOWrapper
 
-def run():
-    with open("input.txt") as input:
-        elves = []
-        calories_buffer = 0
-        for line in input:
-            if line == "\n":
-                heapq.heappush(elves, -calories_buffer)
-                calories_buffer = 0
-            else:
-                calories_buffer += int(line)
+from result import Result
 
-        top3 = [-heapq.heappop(elves) for _ in range(3)]
-        print(top3[0])
-        print(sum(top3))
+def main(input_file: TextIOWrapper):
+    elves = []
+    calories_buffer = 0
+    for line in input_file:
+        if line == "\n":
+            heapq.heappush(elves, -calories_buffer)
+            calories_buffer = 0
+        else:
+            calories_buffer += int(line)
 
-if __name__ == "__main__":
-    run()
+    top3 = [-heapq.heappop(elves) for _ in range(3)]
+    return Result(top3[0], sum(top3))
+
