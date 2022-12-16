@@ -20,7 +20,7 @@ def collect_input(input_name: str, input_path: Path, input_page: Optional[str] =
 
     if input_page:
         os.system(f"open '{input_page}'")
-    sample = click.prompt(input_name)
+    sample = click.edit(input_name)
     with open(input_path, "w") as file_handle:
         file_handle.write(sample)
 
