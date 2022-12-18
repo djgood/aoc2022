@@ -3,18 +3,11 @@ import itertools
 from typing import Iterator, List
 
 from result import Result
+from util import chunked_iterable
 
 def parse_input(file: TextIOWrapper) -> Iterator[str]:
     for line in file:
         yield line.strip()
-
-def chunked_iterable(iterable, size):
-    it = iter(iterable)
-    while True:
-        chunk = tuple(itertools.islice(it, size))
-        if not chunk:
-            break
-        yield chunk
 
 def priority(letter: str) -> int:
     char = ord(letter)
