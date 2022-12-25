@@ -1,17 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from io import TextIOWrapper
 from typing import Optional
 from runner import Result
 
-@dataclass(frozen=True, eq=True)
-class Point2D:
-    x: int
-    y: int
-
-    def __sub__(self, other) -> Point2D:
-        return Point2D(self.x - other.x, self.y - other.y)
+from util import Point2D
 
 class Map:
     lowest_y = 0
